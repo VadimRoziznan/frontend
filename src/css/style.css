@@ -80,6 +80,7 @@ body {
   border: 1px solid black;
   background-color: rgb(225, 228, 241);
   border-radius: 10px;
+  cursor: pointer;
 }
 
 .btn:active {
@@ -108,6 +109,30 @@ body {
 
 .ticket-block:hover {
   background-color: rgb(223, 255, 242)
+}
+
+.short-description-ticket {
+  margin-left: 15px;
+  
+}
+
+.date {
+  margin-left: 160px;
+}
+
+.visible{
+  visibility: visible !important;
+  position: relative !important
+}
+
+.full-part {
+  visibility: hidden;
+  position: absolute;
+
+  margin-top: 25px;
+  margin-left: 60px;
+  margin-right: 100px;
+  margin-bottom: 25px;
 }
 
 .state {
@@ -154,4 +179,6 @@ body {
   background-color: white;
   border: 1px solid black;
   border-radius: 50%;
+  cursor: pointer;
+  
 }
