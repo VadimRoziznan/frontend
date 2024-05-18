@@ -1,12 +1,21 @@
 const addBtn = document.querySelector(".subscribe-add");
 const formContainer = document.querySelector(".form-container");
+const formContainerChange = document.querySelector(".form-container-change")
 const form = formContainer.querySelector(".subscribe-form");
+const formСhange = formContainerChange.querySelector(".subscribe-form-change");
+const fieldShortDescription = formContainerChange.querySelector(".field-short-description")
+const fieldDetailedDescription = formContainerChange.querySelector(".field-detailed-description")
+const cancelBtnChange = formContainerChange.querySelector(".subscribe-cancel")
+const okBtnChange = formContainerChange.querySelector(".subscribe-ok")
 const cancelBtn = form.querySelector(".subscribe-cancel");
 const okBtn = form.querySelector(".subscribe-ok");
-const ticketBlock = document.querySelectorAll(".ticket-block");
+const ticketsBlock = document.querySelector(".tickets-block");
 const xhr = new XMLHttpRequest();
-
+const deleteForm = document.querySelector(".subscribe-form-delete")
+let shortDescription
+let detailedDescription
 let tickets
+let uuid
 
 window.onload = function() {
   fetchTickets(); // Загружаем данные при загрузке страницы
@@ -28,16 +37,107 @@ async function fetchTickets() {
     // Присваивание полученных данных глобальной переменной или используйте их напрямую
     // Например, если у вас есть переменная tickets, вы можете сделать:
     
-    ticketBlock.forEach(block => {
-      ticketsData.forEach((ticket) => {
-        console.log(block.uuid)
-        if (block.uuid !== ticket.id) {
-          block.uuid = ticket.id
-          block.childNodes[1].childNodes[3].childNodes[1].textContent = ticket.name
-        }
-      })
-      
+
+    ticketsData.forEach((ticket) => {
+      let div = document.createElement('div');
+      div.classList.add('ticket-block');
+      div.setAttribute("uuid", ticket.id);
+      /*div.dataset.uuid = ticket.id;*/
+      div.innerHTML = `
+      <div class="short-part">
+          <input name="state" class="state" type="checkbox" checked disabled>
+          <span class="short-description-ticket">
+            <span class="short-description"></span>
+            <span class="date"> 12.04.2024 15:26</span>
+          </span>
+          <button class="delete ticket-btn"></button>
+          <button class="change ticket-btn"></button>
+      </div>
+      <div class="full-part">
+        <span class="full-description"></span>
+      </div>`
+      div.childNodes[1].childNodes[3].childNodes[1].textContent = ticket.name
+      div.childNodes[3].childNodes[1].textContent = ticket.description
+      ticketsBlock.appendChild(div)
+
     })
+
+    const ticketBlock = document.querySelectorAll(".ticket-block");
+
+    ticketBlock.forEach((ticket) => {
+      ticket.addEventListener("click", (event) => {
+
+        if (event.target.classList.contains("short-part")) {
+          ticket.childNodes[3].classList.toggle("visible");
+        }
+
+        if (event.target.classList.contains("change")) {
+          formContainerChange.style.visibility = "visible";
+          formContainerChange.classList.remove("hidden");
+          console.log(event.target.parentNode.parentNode.getAttribute("uuid"));
+          uuid = event.target.parentNode.parentNode.getAttribute("uuid")
+          /*fieldShortDescription.value = event.target.parentNode.childNodes[3].childNodes[1].textContent
+          fieldDetailedDescription.value = event.target.parentNode.parentNode.childNodes[3].childNodes[1].textContent*/
+          /*shortDescription = event.target.parentNode.childNodes[3].childNodes[1].textContent
+          detailedDescription = event.target.parentNode.parentNode.childNodes[3].childNodes[1].textContent*/
+
+        }
+
+
+
+        cancelBtnChange.addEventListener("click", (event) => {
+          /*event.preventDefault();*/
+          if (!formContainerChange.classList.contains("hidden")) {
+            formContainerChange.style.visibility = "hidden";
+            formContainerChange.classList.add("hidden");
+          }
+        })
+        
+        
+        okBtnChange.addEventListener("click", (event) => {
+          if (!formContainerChange.classList.contains("hidden") && formContainerChange.childNodes[1].childNodes[5].textContent && formContainerChange.childNodes[1].childNodes[9].textContent) {
+            formContainerChange.style.visibility = "hidden";
+            formContainerChange.classList.add("hidden");
+          
+          }
+        })
+
+
+
+        
+
+
+
+        if (event.target.classList.contains("delete")) {
+          deleteForm.style.visibility = "visible";
+          deleteForm.classList.remove("hidden");
+          console.log(event.target.parentNode.parentNode)
+
+          const body = new FormData(deleteForm);
+
+          body.append("uuid", uuid)
+
+          const xhr = new XMLHttpRequest();
+          
+          xhr.onreadystatechange = function() {
+            if (xhr.readyState !== 4) return;
+            
+            /*console.log(xht.responseText);*/
+          }
+          
+          xhr.open('POST', 'http://localhost:7070');
+          
+          xhr.send(body);
+
+          form.reset()
+
+        }
+        
+      })
+    })
+    
+      
+
 
     return ticketsData;
   } catch (error) {
@@ -68,6 +168,30 @@ form.addEventListener("submit", (event) => {
 
 })
 
+
+formСhange.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const body = new FormData(formСhange);
+
+  body.append("uuid", uuid)
+
+  const xhr = new XMLHttpRequest();
+  
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState !== 4) return;
+    
+    /*console.log(xht.responseText);*/
+  }
+
+  xhr.open('PUT', 'http://localhost:7070');
+  
+  xhr.send(body);
+
+  formСhange.reset()
+
+})
+
 okBtn.addEventListener("click", (event) => {
   if (!formContainer.classList.contains("hidden")) {
     formContainer.style.visibility = "hidden";
@@ -76,6 +200,13 @@ okBtn.addEventListener("click", (event) => {
   }
 })
 
+okBtnChange.addEventListener("click", (event) => {
+  if (!formContainerChange.classList.contains("hidden")) {
+    formContainerChange.style.visibility = "hidden";
+    formContainerChange.classList.add("hidden");
+  
+  }
+})
 
 addBtn.addEventListener('click', (event) => {
   /*event.preventDefault();*/
@@ -98,25 +229,13 @@ cancelBtn.addEventListener("click", (event) => {
     formContainer.style.visibility = "hidden";
     formContainer.classList.add("hidden");
   }
+  if (!formContainerChange.classList.contains("hidden")) {
+    formContainerChange.style.visibility = "hidden";
+    formContainerChange.classList.add("hidden");
+  }
 })
 
-ticketBlock.forEach((ticket) => {
-  ticket.addEventListener("click", (event) => {
-    if (event.target.tagName !== "BUTTON") {
-      ticket.childNodes[3].classList.toggle("visible");
-    }
-  })
-  /*console.log(ticket.id = 555)
-  console.log(tickets)
-  console.log(ticket.childNodes[1].childNodes[3].childNodes[1].textContent)
-  tickets.forEach((record) => {
-    console.log(record)
-    if (ticket.id !== record.id) {
-      ticket.id = record.id
-      ticket.childNodes[1].childNodes[3].childNodes[1].textContent = record.name
-    }
-  })*/
-})
+
 
 
 
