@@ -1,4 +1,4 @@
-{
+{ 
   "plugins": ["prettier"],
   "extends": ["eslint:recommended", "plugin:prettier/recommended"],
   "env": {
@@ -7,7 +7,8 @@
     "jest": true
   },
   "parserOptions": {
-    "sourceType": "module"
+    "sourceType": "module",
+    "ecmaVersion": 2018
   },
   "rules": {
     "no-unused-vars": "warn"
