@@ -11,15 +11,20 @@ const cancelBtn = form.querySelector(".subscribe-cancel");
 const okBtn = form.querySelector(".subscribe-ok");
 const ticketsBlock = document.querySelector(".tickets-block");
 const xhr = new XMLHttpRequest();
+const formContainerDelete = document.querySelector(".form-container-delete")
 const deleteForm = document.querySelector(".subscribe-form-delete")
+const cancelBtnDelete = deleteForm.querySelector(".subscribe-cancel")
+const okBtnDlete = deleteForm.querySelector(".subscribe-ok")
+
 let shortDescription
 let detailedDescription
 let tickets
 let uuid
+let state
+
 
 window.onload = function() {
   fetchTickets(); // Загружаем данные при загрузке страницы
-
 
 };
 
@@ -33,19 +38,16 @@ async function fetchTickets() {
 
     const ticketsData = await response.json();
     console.log('Received tickets:', ticketsData);
-
-    // Присваивание полученных данных глобальной переменной или используйте их напрямую
-    // Например, если у вас есть переменная tickets, вы можете сделать:
     
-
     ticketsData.forEach((ticket) => {
       let div = document.createElement('div');
       div.classList.add('ticket-block');
       div.setAttribute("uuid", ticket.id);
+      console.log(ticket)
       /*div.dataset.uuid = ticket.id;*/
       div.innerHTML = `
       <div class="short-part">
-          <input name="state" class="state" type="checkbox" checked disabled>
+          <input name="state" class="state" type="checkbox">
           <span class="short-description-ticket">
             <span class="short-description"></span>
             <span class="date"> 12.04.2024 15:26</span>
@@ -58,6 +60,8 @@ async function fetchTickets() {
       </div>`
       div.childNodes[1].childNodes[3].childNodes[1].textContent = ticket.name
       div.childNodes[3].childNodes[1].textContent = ticket.description
+      div.childNodes[1].childNodes[1].checked = ticket.state
+      console.log(div.childNodes[1].childNodes[1])
       ticketsBlock.appendChild(div)
 
     })
@@ -74,70 +78,54 @@ async function fetchTickets() {
         if (event.target.classList.contains("change")) {
           formContainerChange.style.visibility = "visible";
           formContainerChange.classList.remove("hidden");
-          console.log(event.target.parentNode.parentNode.getAttribute("uuid"));
           uuid = event.target.parentNode.parentNode.getAttribute("uuid")
-          /*fieldShortDescription.value = event.target.parentNode.childNodes[3].childNodes[1].textContent
-          fieldDetailedDescription.value = event.target.parentNode.parentNode.childNodes[3].childNodes[1].textContent*/
-          /*shortDescription = event.target.parentNode.childNodes[3].childNodes[1].textContent
-          detailedDescription = event.target.parentNode.parentNode.childNodes[3].childNodes[1].textContent*/
+          
+          fieldShortDescription.value = event.target.parentNode.childNodes[3].childNodes[1].textContent
+          fieldDetailedDescription.value = event.target.parentNode.parentNode.childNodes[3].childNodes[1].textContent
 
         }
 
 
-
         cancelBtnChange.addEventListener("click", (event) => {
-          /*event.preventDefault();*/
+
           if (!formContainerChange.classList.contains("hidden")) {
             formContainerChange.style.visibility = "hidden";
             formContainerChange.classList.add("hidden");
           }
         })
-        
+
+        cancelBtnDelete.addEventListener("click", (event) => {
+
+          if (!formContainerDelete.classList.contains("hidden")) {
+            formContainerDelete.style.visibility = "hidden";
+            formContainerDelete.classList.add("hidden");
+          }
+        })
         
         okBtnChange.addEventListener("click", (event) => {
           if (!formContainerChange.classList.contains("hidden") && formContainerChange.childNodes[1].childNodes[5].textContent && formContainerChange.childNodes[1].childNodes[9].textContent) {
             formContainerChange.style.visibility = "hidden";
             formContainerChange.classList.add("hidden");
+            
+          }
+        })
+
+        okBtnDlete.addEventListener("click", (event) => {
+          if (!formContainerDelete.classList.contains("hidden")) {
+            formContainerDelete.style.visibility = "hidden";
+            formContainerDelete.classList.add("hidden");
           
           }
         })
 
-
-
-        
-
-
-
         if (event.target.classList.contains("delete")) {
-          deleteForm.style.visibility = "visible";
-          deleteForm.classList.remove("hidden");
-          console.log(event.target.parentNode.parentNode)
-
-          const body = new FormData(deleteForm);
-
-          body.append("uuid", uuid)
-
-          const xhr = new XMLHttpRequest();
-          
-          xhr.onreadystatechange = function() {
-            if (xhr.readyState !== 4) return;
-            
-            /*console.log(xht.responseText);*/
-          }
-          
-          xhr.open('POST', 'http://localhost:7070');
-          
-          xhr.send(body);
-
-          form.reset()
-
+          formContainerDelete.style.visibility = "visible";
+          formContainerDelete.classList.remove("hidden");
+          uuid = event.target.parentNode.parentNode.getAttribute("uuid")
         }
-        
       })
     })
-    
-      
-
+  
 
     return ticketsData;
   } catch (error) {
@@ -152,6 +140,8 @@ form.addEventListener("submit", (event) => {
 
   const body = new FormData(form);
 
+  body.append("state", "")
+
   const xhr = new XMLHttpRequest();
   
   xhr.onreadystatechange = function() {
@@ -165,7 +155,7 @@ form.addEventListener("submit", (event) => {
   xhr.send(body);
 
   form.reset()
-
+  location.reload();
 })
 
 
@@ -181,7 +171,6 @@ formСhange.addEventListener("submit", (event) => {
   xhr.onreadystatechange = function() {
     if (xhr.readyState !== 4) return;
     
-    /*console.log(xht.responseText);*/
   }
 
   xhr.open('PUT', 'http://localhost:7070');
@@ -189,6 +178,26 @@ formСhange.addEventListener("submit", (event) => {
   xhr.send(body);
 
   formСhange.reset()
+  location.reload();
+})
+
+
+deleteForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const xhr = new XMLHttpRequest();
+  
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState !== 4) return;
+    
+  }
+
+  xhr.open('DELETE', `http://localhost:7070?uuid=${uuid}`);
+  
+  xhr.send();
+  deleteForm.reset()
+
+  location.reload();
 
 })
 
@@ -209,7 +218,6 @@ okBtnChange.addEventListener("click", (event) => {
 })
 
 addBtn.addEventListener('click', (event) => {
-  /*event.preventDefault();*/
   
   if (formContainer.classList.contains("hidden")) {
     formContainer.style.visibility = "visible";
@@ -217,21 +225,22 @@ addBtn.addEventListener('click', (event) => {
   }
 })
 
-/*form.addEventListener("submit", (event) => {
-  event.preventDefault();
-
-})*/
 
 cancelBtn.addEventListener("click", (event) => {
-  /*event.preventDefault();*/
 
   if (!formContainer.classList.contains("hidden")) {
     formContainer.style.visibility = "hidden";
     formContainer.classList.add("hidden");
   }
+
   if (!formContainerChange.classList.contains("hidden")) {
     formContainerChange.style.visibility = "hidden";
     formContainerChange.classList.add("hidden");
+  }
+
+  if (!formContainerDelete.classList.contains("hidden")) {
+    formContainer.style.visibility = "hidden";
+    formContainer.classList.add("hidden");
   }
 })
 
