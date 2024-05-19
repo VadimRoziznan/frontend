@@ -1,3 +1,5 @@
+#### Доступно на Github Pages: [Работа с HTTP](https://VadimRoziznan.github.io/frontend)
+
 # Домашнее задание к занятию "7. Работа с HTTP"
 
 Правила сдачи задания:
